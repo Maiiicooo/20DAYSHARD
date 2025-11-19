@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>20 Days Hard</title>
+
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 45px;
+            letter-spacing: 2px;
+            text-align: center;
+            margin: 0;
+        }
+
+        .grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            justify-items: center;
+            flex-grow: 1;
+            align-content: center;
+        }
+
+        .day {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .day.complete {
+            background: #0f0;
+            color: #000;
+            border-color: #0f0;
+        }
+
+        #panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 350px;
+            padding: 20px;
+            border: 2px solid #fff;
+            background: #000;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 16px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 3px 0;
+        }
+
+        .task input {
+            width: 18px;
+            height: 18px;
+        }
+
+        #close {
+            cursor: pointer;
+            color: #aaa;
+            text-align: right;
+            font-size: 16px;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>20 DAYS HARD</h1>
+
+    <div class="grid" id="grid"></div>
+
+    <div id="panel">
+        <h3 id="dayTitle"></h3>
+        <div id="tasks"></div>
+        <div id="close">(close)</div>
+    </div>
+
+    <script>
+        const DEFAULT_TASKS = [
+            "45min workout",
+            "10 pages reading",
+            "Cold shower",
+            "No alcohol",
+        ];
+
+        let days = JSON.parse(localStorage.getItem("20dayshard")) || [];
+
+        if (days.length === 0) {
+            for (let i = 0; i < 20; i++) {
+                days.push({
+                    tasks: DEFAULT_TASKS.map(t => ({ name: t, done: false }))
+                });
+            }
+            save();
+        }
+
+        function save() {
+            localStorage.setItem("20dayshard", JSON.stringify(days));
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById("grid");
+            grid.innerHTML = "";
+
+            days.forEach((d, i) => {
+                const el = document.createElement("div");
+                el.className = "day" + (isComplete(i) ? " complete" : "");
+                el.innerText = i + 1;
+                el.onclick = () => openDay(i);
+                grid.appendChild(el);
+            });
+        }
+
+        function openDay(index) {
+            const p = document.getElementById("panel");
+            p.style.display = "flex";
+
+            document.getElementById("dayTitle").innerText = "Day " + (index + 1);
+            const taskBox = document.getElementById("tasks");
+            taskBox.innerHTML = "";
+
+            days[index].tasks.forEach((t, ti) => {
+                const wrap = document.createElement("label");
+                wrap.className = "task";
+
+                const cb = document.createElement("input");
+                cb.type = "checkbox";
+                cb.checked = t.done;
+
+                cb.onchange = () => {
+                    t.done = cb.checked;
+                    save();
+                    renderGrid();
+                };
+
+                wrap.appendChild(cb);
+                wrap.append(" " + t.name);
+                taskBox.appendChild(wrap);
+            });
+        }
+
+        function isComplete(i) {
+            return days[i].tasks.every(t => t.done);
+        }
+
+        document.getElementById("close").onclick = () => {
+            document.getElementById("panel").style.display = "none";
+        };
+
+        renderGrid();
+    </script>
+
+    <footer>
+        <h3>MADE BY MAICOWAVE</h3>
+    </footer>
+
+</body>
+
+</html>
